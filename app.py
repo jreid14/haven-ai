@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template 
-import openai
+from openai import OpenAI
+client = OpenAI()
 from dotenv import load_dotenv
 import os
 
@@ -31,15 +32,22 @@ def checkin():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_input = request.json.get("message")
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are Haven, a gentle trauma-informed AI."},
-            {"role": "user", "content": user_input}
-        ]
-    )
-    return jsonify({"reply": response.choices[0].message["content"]})
+    user_message = request.json.get("message")
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a supportive and emotionally intelligent assistant named Haven."},
+                {"role": "user", "content": user_message}
+            ]
+        )
+
+        reply = response.choices[0].message.content.strip()
+        return jsonify({"reply": reply})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
