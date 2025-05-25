@@ -1,13 +1,13 @@
-from flask import Flask, request, jsonify, render_template 
-from openai import OpenAI
-client = OpenAI()
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+import os
+from flask import Flask, request, jsonify, render_template
+from openai import OpenAI
+from datetime import datetime
 
 app = Flask(__name__)
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 
 @app.route("/")  
 def home():
