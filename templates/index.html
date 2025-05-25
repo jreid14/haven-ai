@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Haven AI</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f2f7f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #4a635d;
+      margin-bottom: 10px;
+    }
+
+    #chat-box {
+      width: 100%;
+      max-width: 600px;
+      height: 500px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 15px;
+      overflow-y: scroll;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      margin-bottom: 20px;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 10px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+
+    .user {
+      background-color: #d1e7dd;
+      align-self: flex-end;
+    }
+
+    .haven {
+      background-color: #f8d7da;
+      align-self: flex-start;
+    }
+
+    #input-area {
+      display: flex;
+      width: 100%;
+      max-width: 600px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 10px 0 0 10px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    button {
+      padding: 12px 18px;
+      border: none;
+      background-color: #4a635d;
+      color: white;
+      border-radius: 0 10px 10px 0;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #3b504a;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Haven</h1>
+  <div id="chat-box"></div>
+
+  <div id="input-area">
+    <input type="text" id="user-input" placeholder="How are you feeling today?">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const inputField = document.getElementById('user-input');
+      const message = inputField.value.trim();
+      if (!message) return;
+
+      const chatBox = document.getElementById('chat-box');
+      chatBox.innerHTML += `<div class="message user"><strong>You:</strong> ${message}</div>`;
+      inputField.value = '';
+
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+
+      const data = await response.json();
+      chatBox.innerHTML += `<div class="message haven"><strong>Haven:</strong> ${data.reply}</div>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
