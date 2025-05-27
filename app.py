@@ -1,34 +1,28 @@
 
-import os
 from flask import Flask, request, jsonify, render_template
 from openai import OpenAI
+import os
 from datetime import datetime
 
 app = Flask(__name__)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-
-@app.route("/")  
+@app.route("/")
 def home():
     return render_template("index.html")
-from datetime import datetime
 
 @app.route("/checkin", methods=["POST"])
 def checkin():
-    data = request.get_json()
+    data = request.json
     mood = data.get("mood")
     journal = data.get("journal")
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.now().isoformat()
 
-    log_entry = f"{timestamp} | Mood: {mood} | Journal: {journal}\n"
+    with open("checkins.log", "a") as f:
+        f.write(f"{timestamp} | Mood: {mood} | Journal: {journal}\n")
 
-    # Save to a file (optional)
-    with open("checkins.log", "a", encoding="utf-8") as f:
-        f.write(log_entry)
-
-    return jsonify({"status": "ok"})
-
+    return jsonify({"message": "Check-in saved successfully."})
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -43,14 +37,12 @@ def chat():
                 {"role": "user", "content": user_message}
             ]
         )
-
         reply = response.choices[0].message.content.strip()
         print("AI reply:", reply)
         return jsonify({"reply": reply})
 
     except Exception as e:
         print("❌ OpenAI error:", e)
+        if "insufficient_quota" in str(e):
+            return jsonify({"reply": "Our AI assistant is temporarily unavailable due to API limits. Please try again later."})
         return jsonify({"error": str(e)}), 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
