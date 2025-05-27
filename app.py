@@ -33,6 +33,7 @@ def checkin():
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message")
+    print("Received message:", user_message)
 
     try:
         response = client.chat.completions.create(
@@ -44,9 +45,11 @@ def chat():
         )
 
         reply = response.choices[0].message.content.strip()
+        print("AI reply:", reply)
         return jsonify({"reply": reply})
 
     except Exception as e:
+        print("❌ OpenAI error:", e)
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
